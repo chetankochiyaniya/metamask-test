@@ -94,17 +94,10 @@ export default function App() {
     });
   };
 
-  // const etherValue = ethers.utils.parseEther("0.0008");
-  // const weiValue = ethers.BigNumber.from(etherValue); // Use ethers.BigNumber
+  const etherValue = ethers.utils.parseEther("0.0008");
+  const weiValue = ethers.BigNumber.from(etherValue); // Use ethers.BigNumber
 
-  // console.log(weiValue.toString());
-
-  const recipientAddress = "0x4C1C6e4fAf48D3f90d4678DBD220116A56B9a5f4";
-  const maticAmountInWei = ethers.utils
-    .parseUnits("0.0008", "ether")
-    .toString();
-
-  const metamaskSendUrl = `https://metamask.app.link/send/pay-0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0/transfer?address=${recipientAddress}&uint256=${maticAmountInWei}`;
+  console.log(weiValue.toString());
 
   return (
     <form className="m-4">
@@ -128,8 +121,7 @@ export default function App() {
         <footer className="p-4">
           {isMobile ? (
             <a
-              // href={`https://metamask.app.link/send/${receiverWalletAddress}?value=${weiValue}`}
-              href={metamaskSendUrl}
+              href={`https://metamask.app.link/send/${receiverWalletAddress}?value=${weiValue}`}
               className="btn btn-primary submit-button focus:ring focus:outline-none w-full"
             >
               Pay now
