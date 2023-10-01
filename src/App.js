@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ErrorMessage from "./components/ErrorMessage";
 import TxList from "./components/TxList";
 
@@ -60,6 +60,29 @@ export default function App() {
   const [txs, setTxs] = useState(null);
   const [coins, setCoins] = useState(null);
 
+  const [isMobile, setIsMobile] = useState(false);
+  const receiverWalletAddress = "0x4c1c6e4faf48d3f90d4678dbd220116a56b9a5f4";
+
+  useEffect(() => {
+    // Check if the device is mobile
+    const mobileMediaQuery = window.matchMedia("(max-width: 768px)");
+
+    // Initial check when the component mounts
+    setIsMobile(mobileMediaQuery.matches);
+
+    // Add a listener to update the state when the viewport changes
+    const handleViewportChange = (event) => {
+      setIsMobile(event.matches);
+    };
+
+    mobileMediaQuery.addListener(handleViewportChange);
+
+    // Clean up the listener when the component unmounts
+    return () => {
+      mobileMediaQuery.removeListener(handleViewportChange);
+    };
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError();
@@ -67,9 +90,21 @@ export default function App() {
       setError,
       setTxs,
       ether: coins,
-      addr: "0x4c1c6e4faf48d3f90d4678dbd220116a56b9a5f4",
+      addr: receiverWalletAddress,
     });
   };
+
+  // const etherValue = ethers.utils.parseEther("0.0008");
+  // const weiValue = ethers.BigNumber.from(etherValue); // Use ethers.BigNumber
+
+  // console.log(weiValue.toString());
+
+  const recipientAddress = "0x4C1C6e4fAf48D3f90d4678DBD220116A56B9a5f4";
+  const maticAmountInWei = ethers.utils
+    .parseUnits("0.0008", "ether")
+    .toString();
+
+  const metamaskSendUrl = `https://metamask.app.link/send/pay-0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0/transfer?address=${recipientAddress}&uint256=${maticAmountInWei}`;
 
   return (
     <form className="m-4">
@@ -91,13 +126,23 @@ export default function App() {
           </div>
         </main>
         <footer className="p-4">
-          <button
-            type="submit"
-            onClick={handleSubmit}
-            className="btn btn-primary submit-button focus:ring focus:outline-none w-full"
-          >
-            Pay now
-          </button>
+          {isMobile ? (
+            <a
+              // href={`https://metamask.app.link/send/${receiverWalletAddress}?value=${weiValue}`}
+              href={metamaskSendUrl}
+              className="btn btn-primary submit-button focus:ring focus:outline-none w-full"
+            >
+              Pay now
+            </a>
+          ) : (
+            <button
+              type="submit"
+              onClick={handleSubmit}
+              className="btn btn-primary submit-button focus:ring focus:outline-none w-full"
+            >
+              Pay now
+            </button>
+          )}
           <ErrorMessage message={error} />
           <TxList txs={txs} />
         </footer>
