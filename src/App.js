@@ -1,13 +1,10 @@
 import { ethers } from "ethers";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ErrorMessage from "./components/ErrorMessage";
 import TxList from "./components/TxList";
 
 const startPayment = async ({ setError, setTxs, ether, addr }) => {
   try {
-    if (!window.ethereum)
-      throw new Error("No crypto wallet found. Please install it.");
-
     // Request Ethereum wallet permissions
     await window.ethereum.send("eth_requestAccounts");
 
@@ -59,7 +56,8 @@ export default function App() {
   const [error, setError] = useState();
   const [txs, setTxs] = useState(null);
   const [coins, setCoins] = useState(null);
-
+  const [connectWallet, setConnectWallet] = useState(false);
+  const [connected, setConnected] = useState(false);
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError();
@@ -70,6 +68,21 @@ export default function App() {
       addr: "0x4c1c6e4faf48d3f90d4678dbd220116a56b9a5f4",
     });
   };
+
+  // Check if MetaMask is installed
+  useEffect(() => {
+    if (typeof window.ethereum === "undefined") {
+      setConnectWallet(true);
+    } else {
+      setConnectWallet(false);
+    }
+
+    if (window.ethereum) {
+      setConnected(true);
+    } else {
+      setConnected(false);
+    }
+  });
 
   return (
     <form className="m-4">
@@ -91,6 +104,11 @@ export default function App() {
           </div>
         </main>
         <footer className="p-4">
+          {connected === false ? (
+            <>
+              <w3m-button />
+            </>
+          ) : null}
           <button
             type="submit"
             onClick={handleSubmit}
@@ -98,6 +116,7 @@ export default function App() {
           >
             Pay now
           </button>
+
           <ErrorMessage message={error} />
           <TxList txs={txs} />
         </footer>
