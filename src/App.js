@@ -58,7 +58,7 @@ const VerifyCryptoTxs = (txsHash) => {
 export default function App() {
   const [error, setError] = useState();
   const [txs, setTxs] = useState(null);
-  const [coins, setCoins] = useState(null);
+  const [coins, setCoins] = useState("0");
 
   const [isMobile, setIsMobile] = useState(false);
   const receiverWalletAddress = "0x4c1c6e4faf48d3f90d4678dbd220116a56b9a5f4";
@@ -86,21 +86,40 @@ export default function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError();
+    // Validate that coins is a valid number
+    const coinsValue = parseFloat(coins);
+    if (isNaN(coinsValue) || coinsValue <= 0) {
+      setError("Invalid amount. Please enter a valid number greater than 0.");
+      return;
+    }
+
+    const amount = coinsValue.toString();
     await startPayment({
       setError,
       setTxs,
-      ether: coins,
+      ether: amount,
       addr: receiverWalletAddress,
     });
   };
 
-  const etherValue = ethers.utils.parseEther("0.0008");
+  const etherValue = ethers.utils.parseEther(coins.toString());
   const weiValue = ethers.BigNumber.from(etherValue); // Use ethers.BigNumber
 
-  console.log(weiValue.toString());
+  // console.log(weiValue);
 
+  const handleInput = (e) => {
+    if (
+      e.target.value == " " ||
+      e.target.value == "" ||
+      e.target.value == null
+    ) {
+      setCoins("0");
+    } else {
+      setCoins(e.target.value);
+    }
+  };
   return (
-    <form className="m-4">
+    <div className="m-4">
       <div className="credit-card w-full lg:w-1/2 sm:w-auto shadow-lg mx-auto rounded-xl bg-white">
         <main className="mt-4 p-4">
           <h1 className="text-xl font-semibold text-gray-700 text-center">
@@ -110,10 +129,10 @@ export default function App() {
             <div className="my-3">
               <input
                 name="ether"
-                type="text"
+                type="number"
                 className="input input-bordered block w-full focus:ring focus:outline-none"
                 placeholder="Amount in Matic , 1 MATIC = 1 Coin"
-                onChange={(e) => setCoins(e.target.value)}
+                onChange={handleInput}
               />
             </div>
           </div>
@@ -127,18 +146,19 @@ export default function App() {
               Pay now
             </a>
           ) : (
-            <button
-              type="submit"
-              onClick={handleSubmit}
-              className="btn btn-primary submit-button focus:ring focus:outline-none w-full"
-            >
-              Pay now
-            </button>
+            <>
+              <button
+                onClick={handleSubmit}
+                className="btn btn-primary submit-button focus:ring focus:outline-none w-full"
+              >
+                Pay now
+              </button>
+              <ErrorMessage message={error} />
+              <TxList txs={txs} />
+            </>
           )}
-          <ErrorMessage message={error} />
-          <TxList txs={txs} />
         </footer>
       </div>
-    </form>
+    </div>
   );
 }
